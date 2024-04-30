@@ -84,65 +84,65 @@ def proposition_transport_nord_ouest(matrice_couts, provisions, commandes):
 
 
 def proposition_transport_balas_hammer(matrice_couts, provisions, commandes):
-    matrice_couts_np = np.array(matrice_couts)  # Convertir la liste en une matrice NumPy
+    matrice_couts_np = np.array(matrice_couts, dtype=float)
     nb_lignes, nb_colonnes = len(provisions), len(commandes)
-    transport = np.full((nb_lignes, nb_colonnes), -1)
+    transport = np.zeros((nb_lignes, nb_colonnes), dtype=int)
     
-    while np.any(transport == -1):
-        penalites = []    
-        # Calcul des pénalités pour chaque ligne
+    active_rows = np.ones(nb_lignes, dtype=bool)  # Lignes actives
+    active_cols = np.ones(nb_colonnes, dtype=bool)  # Colonnes actives
+    
+    while np.any(provisions) and np.any(commandes):
+        penalites = np.zeros(nb_lignes + nb_colonnes)
+        
+        # Calcul des pénalités pour chaque ligne active
         for i in range(nb_lignes):
-            valeurs = sorted(matrice_couts_np[i][:nb_colonnes])
-            penalites.append(abs(valeurs[0] - valeurs[1]))
-        
-        # Calcul des pénalités pour chaque colonne
-        for i in range(nb_colonnes):
-            valeurs = sorted([matrice_couts_np[j][i] for j in range(nb_lignes)])
-            penalites.append(abs(valeurs[0] - valeurs[1])) 
+            if active_rows[i]:
+                costs = matrice_couts_np[i, active_cols]
+                valid_costs = costs[costs > 0]  # ignore zero as it indicates inactive column
+                if len(valid_costs) > 1:
+                    sorted_costs = np.sort(valid_costs)
+                    penalites[i] = sorted_costs[1] - sorted_costs[0]
+                elif len(valid_costs) == 1:
+                    penalites[i] = valid_costs[0]  # if only one cost exists, penalize by that cost itself
 
-        # Trouver l'index de la ligne/colonne avec la plus grande pénalité
-        max_penalites_index = np.argmax(penalites)
-        max_penalites = penalites[max_penalites_index]
-        
-        # Si la plus grande pénalité est négative ou nulle, la solution est optimale
-        #if max_penalites <= 0:
-            #break
+        # Calcul des pénalités pour chaque colonne active
+        for j in range(nb_colonnes):
+            if active_cols[j]:
+                costs = matrice_couts_np[active_rows, j]
+                valid_costs = costs[costs > 0]  # ignore zero as it indicates inactive row
+                if len(valid_costs) > 1:
+                    sorted_costs = np.sort(valid_costs)
+                    penalites[nb_lignes + j] = sorted_costs[1] - sorted_costs[0]
+                elif len(valid_costs) == 1:
+                    penalites[nb_lignes + j] = valid_costs[0]  # if only one cost exists, penalize by that cost itself
 
-        if max_penalites_index < nb_lignes:
-            ligne = max_penalites_index
-            colonne = np.argmin(matrice_couts_np[ligne,:])
+        # Find the index with the highest penalty
+        max_index = np.argmax(penalites)
+        if penalites[max_index] == 0:
+            break  # Break if no valid moves left (i.e., all penalties are zero)
+        
+        if max_index < nb_lignes:
+            i = max_index
+            valid_indices = np.where(active_cols)[0]
+            j = valid_indices[np.argmin(matrice_couts_np[i, valid_indices])]
         else:
-            colonne = max_penalites_index - nb_lignes
-            ligne = np.argmin(matrice_couts_np[:,colonne])
+            j = max_index - nb_lignes
+            valid_indices = np.where(active_rows)[0]
+            i = valid_indices[np.argmin(matrice_couts_np[valid_indices, j])]
         
-        # Allocation maximale permise à la case avec le coût de transport le plus bas
-        quantite = min(provisions[ligne], commandes[colonne])
+        # Allocate as much as possible
+        quantite = min(provisions[i], commandes[j])
+        transport[i, j] = quantite
+        provisions[i] -= quantite
+        commandes[j] -= quantite
         
-        # Mise a jour des quantite de provisions et commandes
-        provisions[ligne] -= quantite
-        commandes[colonne] -= quantite
-    
-        # Remplacement du reste de la ligne par 0 sauf la case affectée
-        if provisions[ligne] == 0:
-            matrice_couts_np[ligne,:] = 0
-            transport[ligne,:] = 0
-        
-        # Remplacement du reste de la colonne par 0 sauf la case affectée
-        if commandes[colonne] == 0:
-            matrice_couts_np[:,colonne][matrice_couts_np[:,colonne] != np.inf] = 0
-            transport[:,colonne][matrice_couts_np[:,colonne] != np.inf] = 0
-        transport[ligne, colonne] = quantite
-        
-        """
-        # Exclure les lignes et les colonnes avec des quantités nulles de la prochaine itération
-        indices_lignes_non_nulles = np.where(np.sum(transport, axis=1) > 0)[0]
-        indices_colonnes_non_nulles = np.where(np.sum(transport, axis=0) > 0)[0]
-        matrice_couts_np = matrice_couts_np[indices_lignes_non_nulles[:, None], :][:, indices_colonnes_non_nulles]
-        provisions = provisions[indices_lignes_non_nulles]
-        commandes = commandes[indices_colonnes_non_nulles]
-        transport = transport[indices_lignes_non_nulles[:, None], indices_colonnes_non_nulles]
-        """
-        break
+        # Update active status
+        if provisions[i] == 0:
+            active_rows[i] = False
+        if commandes[j] == 0:
+            active_cols[j] = False
+
+
     return transport
 
 def table_couts_potentiels(proposition_transport, matrice_couts):
