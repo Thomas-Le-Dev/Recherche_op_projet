@@ -185,3 +185,47 @@ def table_couts_marginaux(matrice_couts, tab_couts_potentiels):
             couts_marginaux[i][j] = matrice_couts[i][j] - tab_couts_potentiels[i][j]
     
     return couts_marginaux
+
+
+def verifier_graphe_biparti_arete(proposition_transport):
+    # Initialisation des variables
+    nb_fournisseurs, nb_clients = proposition_transport.shape
+    nb_aretes = np.sum(proposition_transport > 0)
+    nb_sommets = nb_fournisseurs + nb_clients
+    # DEBUG TODO: Remove
+    print(f"Nombre d'aretes : {nb_aretes}")
+    print(f"Nombre de sommets : {nb_sommets}")
+    return nb_aretes == nb_sommets - 1
+
+
+def graphe_biparti_contient_cycle(proposition_transport):
+    # Initialisation des variables
+    nb_fournisseurs, nb_clients = proposition_transport.shape
+    nb_aretes = np.sum(proposition_transport > 0)
+    nb_sommets = nb_fournisseurs + nb_clients
+    return nb_aretes > nb_sommets - 1
+
+def graphe_biparti_est_un_arbre(proposition_transport):
+
+    return verifier_graphe_biparti_arete and not graphe_biparti_contient_cycle(proposition_transport)
+
+# Si le graphe contient |V | − p arêtes (avec p > 1), on va artificiellement rajouter les
+# p − 1 arêtes ayant les plus petits coûts de transport permettant de former un graphe
+# maximalement acyclique.
+def rajouter_aretes(proposition_transport, matrice_couts):
+    # On trouve les indices des sommets non reliés
+    indices_non_relie = np.where(proposition_transport == 0)
+    couts_non_relie = matrice_couts[indices_non_relie]
+    indices_tries = np.argsort(couts_non_relie)
+
+    # Tant qu'on a pas le bon nombre d'arêtes, on rajoute les arêtes
+    while not verifier_graphe_biparti_arete(proposition_transport):
+        # On teste chaque arête en verifiant si elle ne crée pas de cycle
+        for i in range(len(indices_tries)):
+            # On rajoute l'arête
+            proposition_transport[indices_non_relie[i]] = 1
+            # On vérifie si le graphe est toujours un arbre
+            if graphe_biparti_est_un_arbre(proposition_transport):
+                break
+            # Sinon on enlève l'arête
+            proposition_transport[indices_non_relie[i]] = 0
