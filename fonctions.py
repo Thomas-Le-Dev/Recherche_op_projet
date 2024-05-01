@@ -9,7 +9,6 @@ def menu_principal():
     print("\n----- BIENVENUE DANS NOTRE PROGRAMME DE RÉSOLUTION DE PROBLEMES DE TRANSPORT ! -----")
     print("Menu principal : (Saisir chiffre selon utilisation)\n")
     print(" 1 : Lecture d'un tableau et affichage")
-    print(" 2 : Fixer la proposition initiale")
     print(" 0 : Quitter\n")
 
 
@@ -88,59 +87,59 @@ def proposition_transport_balas_hammer(matrice_couts, provisions, commandes):
     nb_lignes, nb_colonnes = len(provisions), len(commandes)
     transport = np.zeros((nb_lignes, nb_colonnes), dtype=int)
     
-    active_rows = np.ones(nb_lignes, dtype=bool)  # Lignes actives
-    active_cols = np.ones(nb_colonnes, dtype=bool)  # Colonnes actives
+    lignes_actives = np.ones(nb_lignes, dtype=bool)  # Lignes actives
+    colonnes_actives = np.ones(nb_colonnes, dtype=bool)  # Colonnes actives
     
     while np.any(provisions) and np.any(commandes):
         penalites = np.zeros(nb_lignes + nb_colonnes)
         
         # Calcul des pénalités pour chaque ligne active
         for i in range(nb_lignes):
-            if active_rows[i]:
-                costs = matrice_couts_np[i, active_cols]
-                valid_costs = costs[costs > 0]  # ignore zero as it indicates inactive column
-                if len(valid_costs) > 1:
-                    sorted_costs = np.sort(valid_costs)
-                    penalites[i] = sorted_costs[1] - sorted_costs[0]
-                elif len(valid_costs) == 1:
-                    penalites[i] = valid_costs[0]  # if only one cost exists, penalize by that cost itself
+            if lignes_actives[i]:
+                couts = matrice_couts_np[i, colonnes_actives]
+                couts_valides = couts[couts > 0]  # ignore zero as it indicates inactive column
+                if len(couts_valides) > 1:
+                    couts_valides_tries = np.sort(couts_valides)
+                    penalites[i] = couts_valides_tries[1] - couts_valides_tries[0]
+                elif len(couts_valides) == 1:
+                    penalites[i] = couts_valides[0]  # if only one cost exists, penalize by that cost itself
 
         # Calcul des pénalités pour chaque colonne active
         for j in range(nb_colonnes):
-            if active_cols[j]:
-                costs = matrice_couts_np[active_rows, j]
-                valid_costs = costs[costs > 0]  # ignore zero as it indicates inactive row
-                if len(valid_costs) > 1:
-                    sorted_costs = np.sort(valid_costs)
-                    penalites[nb_lignes + j] = sorted_costs[1] - sorted_costs[0]
-                elif len(valid_costs) == 1:
-                    penalites[nb_lignes + j] = valid_costs[0]  # if only one cost exists, penalize by that cost itself
+            if colonnes_actives[j]:
+                couts = matrice_couts_np[lignes_actives, j]
+                couts_valides = couts[couts > 0]  # ignore zero as it indicates inactive row
+                if len(couts_valides) > 1:
+                    couts_valides_tries = np.sort(couts_valides)
+                    penalites[nb_lignes + j] = couts_valides_tries[1] - couts_valides_tries[0]
+                elif len(couts_valides) == 1:
+                    penalites[nb_lignes + j] = couts_valides[0]  # if only one cost exists, penalize by that cost itself
 
-        # Find the index with the highest penalty
+        # Trouver l'index avec la pénalité la plus élevée
         max_index = np.argmax(penalites)
         if penalites[max_index] == 0:
-            break  # Break if no valid moves left (i.e., all penalties are zero)
+            break  # Arrêter s'il ne reste aucun mouvement valide (c'est-à-dire, toutes les pénalités sont nulles)
         
         if max_index < nb_lignes:
             i = max_index
-            valid_indices = np.where(active_cols)[0]
-            j = valid_indices[np.argmin(matrice_couts_np[i, valid_indices])]
+            indices_valides = np.where(colonnes_actives)[0]
+            j = indices_valides[np.argmin(matrice_couts_np[i, indices_valides])]
         else:
             j = max_index - nb_lignes
-            valid_indices = np.where(active_rows)[0]
-            i = valid_indices[np.argmin(matrice_couts_np[valid_indices, j])]
+            indices_valides = np.where(lignes_actives)[0]
+            i = indices_valides[np.argmin(matrice_couts_np[indices_valides, j])]
         
-        # Allocate as much as possible
+        # Allouer autant que possible
         quantite = min(provisions[i], commandes[j])
         transport[i, j] = quantite
         provisions[i] -= quantite
         commandes[j] -= quantite
         
-        # Update active status
+        # Mettre à jour le statut actif
         if provisions[i] == 0:
-            active_rows[i] = False
+            lignes_actives[i] = False
         if commandes[j] == 0:
-            active_cols[j] = False
+            colonnes_actives[j] = False
 
 
     return transport
@@ -149,7 +148,7 @@ def table_couts_potentiels(proposition_transport, matrice_couts):
     nb_fournisseurs, nb_clients = proposition_transport.shape
     couts_potentiels = np.zeros((nb_fournisseurs, nb_clients))
     dictionnaire_equation = {"L1":0} #Valeur initiale L1 = 0
-    #D'abord toutes les valeurs différentes de 0 dans le tab nord ouest
+    #D'abord toutes les valeurs différentes de 0 dans la proposition de transport
     for i in range(0, nb_fournisseurs):
         for j in range(0, nb_clients):
             if proposition_transport[i][j] != 0:
