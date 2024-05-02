@@ -155,6 +155,9 @@ def table_couts_potentiels(proposition_transport, matrice_couts):
                 couts_potentiels[i][j] = matrice_couts[i][j]
 
     #Remplissage dico
+    print('Verification')
+    print(graphe_biparti_est_un_arbre(proposition_transport))
+    print(rajouter_aretes(proposition_transport, matrice_couts))
     for j in range(nb_fournisseurs):
         for i in range(nb_clients):
             if proposition_transport[j][i] != 0:
@@ -207,25 +210,33 @@ def graphe_biparti_contient_cycle(proposition_transport):
 
 def graphe_biparti_est_un_arbre(proposition_transport):
 
-    return verifier_graphe_biparti_arete and not graphe_biparti_contient_cycle(proposition_transport)
+    return verifier_graphe_biparti_arete(proposition_transport) and not graphe_biparti_contient_cycle(proposition_transport)
 
 # Si le graphe contient |V | − p arêtes (avec p > 1), on va artificiellement rajouter les
 # p − 1 arêtes ayant les plus petits coûts de transport permettant de former un graphe
 # maximalement acyclique.
 def rajouter_aretes(proposition_transport, matrice_couts):
-    # On trouve les indices des sommets non reliés
-    indices_non_relie = np.where(proposition_transport == 0)
-    couts_non_relie = matrice_couts[indices_non_relie]
-    indices_tries = np.argsort(couts_non_relie)
+    if not isinstance(matrice_couts, np.ndarray):
+        matrice_couts = np.array(matrice_couts)  # Convert to numpy array if it's not
 
-    # Tant qu'on a pas le bon nombre d'arêtes, on rajoute les arêtes
-    while not verifier_graphe_biparti_arete(proposition_transport):
-        # On teste chaque arête en verifiant si elle ne crée pas de cycle
-        for i in range(len(indices_tries)):
-            # On rajoute l'arête
-            proposition_transport[indices_non_relie[i]] = 1
-            # On vérifie si le graphe est toujours un arbre
-            if graphe_biparti_est_un_arbre(proposition_transport):
+    indices_non_relie = np.nonzero(proposition_transport == 0)
+    i_indices, j_indices = indices_non_relie
+
+    couts_non_relies = matrice_couts[i_indices, j_indices]
+    sorted_indices = np.argsort(couts_non_relies)
+    sorted_i_indices = i_indices[sorted_indices]
+    sorted_j_indices = j_indices[sorted_indices]
+
+    # Proceed with adding edges
+    for i, j in zip(sorted_i_indices, sorted_j_indices):
+        proposition_transport_temp = proposition_transport.copy()
+        proposition_transport_temp[i, j] = 1  # Simulate adding the edge
+
+        if not graphe_biparti_contient_cycle(proposition_transport_temp):
+            proposition_transport[i, j] = 1  # Actually add the edge
+            if verifier_graphe_biparti_arete(proposition_transport):
                 break
-            # Sinon on enlève l'arête
-            proposition_transport[indices_non_relie[i]] = 0
+
+    return proposition_transport
+
+
