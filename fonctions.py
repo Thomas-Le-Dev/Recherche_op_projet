@@ -3,6 +3,8 @@ import pprint
 
 from prettytable import *
 
+import copy
+
 
 
 def menu_principal():
@@ -155,9 +157,6 @@ def table_couts_potentiels(proposition_transport, matrice_couts):
                 couts_potentiels[i][j] = matrice_couts[i][j]
 
     #Remplissage dico
-    print('Verification')
-    print(graphe_biparti_est_un_arbre(proposition_transport))
-    print(rajouter_aretes(proposition_transport, matrice_couts))
     for j in range(nb_fournisseurs):
         for i in range(nb_clients):
             if proposition_transport[j][i] != 0:
@@ -189,33 +188,70 @@ def table_couts_marginaux(matrice_couts, tab_couts_potentiels):
     
     return couts_marginaux
 
-
-def verifier_graphe_biparti_arete(proposition_transport):
-    # Initialisation des variables
+def construire_graphe_biparti(proposition_transport):
+    # Utilisation d'un dictionnaire pour stocker les sommets et les arêtes
+    # Ceci est une liste d'adjacence
+    graphe = {}
     nb_fournisseurs, nb_clients = proposition_transport.shape
-    nb_aretes = np.sum(proposition_transport > 0)
-    nb_sommets = nb_fournisseurs + nb_clients
-    # DEBUG TODO: Remove
-    print(f"Nombre d'aretes : {nb_aretes}")
+    for i in range(nb_fournisseurs):
+        graphe[f"S{i+1}"] = []
+        for j in range(nb_clients):
+            if proposition_transport[i][j] != 0:
+                graphe[f"S{i+1}"].append(f"L{j+1}")
+    
+    for j in range(nb_clients):
+        graphe[f"L{j+1}"] = []
+        for i in range(nb_fournisseurs):
+            if proposition_transport[i][j] != 0:
+                graphe[f"L{j+1}"].append(f"S{i+1}")
+    
+    return graphe
+
+def verifier_graphe_biparti_arete(graphe):
+    # On verifie nb_aretes == nb_sommets - 1
+    nb_sommets = len(graphe)
+    nb_aretes = 0
+    
+    # Compter aretes (attention graphe non orienté donc on compte chaque arete une seule fois)
+    for sommet, voisins in graphe.items():
+        nb_aretes += len(voisins)
+
+    # On divise par 2 car on a compté chaque arête deux fois
+    nb_aretes //= 2 
+
     print(f"Nombre de sommets : {nb_sommets}")
+    print(f"Nombre d'arêtes : {nb_aretes}")
+
     return nb_aretes == nb_sommets - 1
 
 
-def graphe_biparti_contient_cycle(proposition_transport):
-    # Initialisation des variables
-    nb_fournisseurs, nb_clients = proposition_transport.shape
-    nb_aretes = np.sum(proposition_transport > 0)
-    nb_sommets = nb_fournisseurs + nb_clients
-    return nb_aretes > nb_sommets - 1
+def graphe_biparti_contient_cycle(graphe):
+    # Detecter un cycle dans un graphe non orienté avec sommets S et L
+    def dfs(sommet, parent, visite):
+        visite[sommet] = True
+        for voisin in graphe[sommet]:
+            if not visite[voisin]:
+                if dfs(voisin, sommet, visite):
+                    return True
+            elif voisin != parent:
+                return True
+        return False
+    
+    visite = {sommet: False for sommet in graphe}
+    for sommet in visite:
+        if not visite[sommet]:
+            if dfs(sommet, None, visite):
+                return True
+    return False
 
-def graphe_biparti_est_un_arbre(proposition_transport):
+def graphe_biparti_est_un_arbre(proposition_transport, graphe):
 
-    return verifier_graphe_biparti_arete(proposition_transport) and not graphe_biparti_contient_cycle(proposition_transport)
+    return verifier_graphe_biparti_arete(graphe) and not graphe_biparti_contient_cycle(graphe)
 
 # Si le graphe contient |V | − p arêtes (avec p > 1), on va artificiellement rajouter les
 # p − 1 arêtes ayant les plus petits coûts de transport permettant de former un graphe
 # maximalement acyclique.
-def rajouter_aretes(proposition_transport, matrice_couts):
+def rajouter_aretes(proposition_transport, matrice_couts, graphe):
     if not isinstance(matrice_couts, np.ndarray):
         matrice_couts = np.array(matrice_couts)  # Convert to numpy array if it's not
 
@@ -230,11 +266,17 @@ def rajouter_aretes(proposition_transport, matrice_couts):
     # Proceed with adding edges
     for i, j in zip(sorted_i_indices, sorted_j_indices):
         proposition_transport_temp = proposition_transport.copy()
+        graphe_temp = copy.deepcopy(graphe)
         proposition_transport_temp[i, j] = 1  # Simulate adding the edge
+        graphe_temp[f'S{i+1}'].append(f'L{j+1}')
+        graphe_temp[f'L{j+1}'].append(f'S{i+1}')
 
-        if not graphe_biparti_contient_cycle(proposition_transport_temp):
+        if not graphe_biparti_contient_cycle(graphe_temp):
             proposition_transport[i, j] = 1  # Actually add the edge
-            if verifier_graphe_biparti_arete(proposition_transport):
+            graphe[f'S{i+1}'].append(f'L{j+1}')
+            graphe[f'L{j+1}'].append(f'S{i+1}')
+            print(f'Ajout de l\'arête (S{i+1}, L{j+1})')
+            if verifier_graphe_biparti_arete(graphe):
                 break
 
     return proposition_transport
