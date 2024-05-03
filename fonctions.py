@@ -175,6 +175,48 @@ def table_couts_potentiels(proposition_transport, matrice_couts):
     
     return couts_potentiels
 
+def calculer_couts_potentiels_graphe(proposition_transport, matrice_couts, graphe):
+    
+    nb_fournisseurs, nb_clients = proposition_transport.shape
+    couts_potentiels = np.zeros((nb_fournisseurs, nb_clients))
+    matrice_couts = np.array(matrice_couts)
+
+    
+    dictionnaire_potentiels = {"L1": 0}
+    
+    # Établir une file d'attente de nœuds à visiter
+    list_to_visit = ['L1']
+    visited = set()
+
+    while list_to_visit:
+        current_node = list_to_visit.pop(0)
+        if current_node not in visited:
+            visited.add(current_node)
+            if current_node.startswith('S'):
+                source_index = int(current_node[1:]) - 1
+                for neighbor in graphe[current_node]:
+                    client_index = int(neighbor[1:]) - 1
+                    if neighbor not in dictionnaire_potentiels:
+                        dictionnaire_potentiels[neighbor] = matrice_couts[source_index, client_index] + dictionnaire_potentiels[current_node]
+                        list_to_visit.append(neighbor)
+            else:
+                client_index = int(current_node[1:]) - 1
+                for neighbor in graphe[current_node]:
+                    source_index = int(neighbor[1:]) - 1
+                    if neighbor not in dictionnaire_potentiels:
+                        dictionnaire_potentiels[neighbor] = dictionnaire_potentiels[current_node] - matrice_couts[source_index, client_index]
+                        list_to_visit.append(neighbor)
+
+    # Calculer les coûts potentiels pour chaque connexion possible
+    for i in range(nb_fournisseurs):
+        for j in range(nb_clients):
+            si_node = f"S{i+1}"
+            li_node = f"L{j+1}"
+            couts_potentiels[i, j] = matrice_couts[i, j] + dictionnaire_potentiels.get(si_node, np.inf) - dictionnaire_potentiels.get(li_node, np.inf)
+            
+
+    pprint.pprint(dictionnaire_potentiels)
+    return couts_potentiels
 
 def table_couts_marginaux(matrice_couts, tab_couts_potentiels):
     # Initialisation des variables

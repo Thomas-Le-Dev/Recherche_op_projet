@@ -49,7 +49,9 @@ while menu != 0:
                 print("Le graphe n'est pas connexe")
                 # Ajouter des aretes pour rendre le graphe connexe
                 rajouter_aretes(proposition_balas_hammer, matrice_des_couts, graphe)
-            couts_potentiels = table_couts_potentiels(proposition_balas_hammer, matrice_des_couts)
+            
+            couts_potentiels = calculer_couts_potentiels_graphe(proposition_balas_hammer, matrice_des_couts, graphe)
+            #couts_potentiels = table_couts_potentiels(proposition_balas_hammer, matrice_des_couts)
             couts_marginaux = table_couts_marginaux(matrice_des_couts, couts_potentiels)
             print("\nTableau des coûts potentiels :\n")
             print(couts_potentiels)
