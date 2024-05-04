@@ -95,7 +95,7 @@ def proposition_transport_nord_ouest(matrice_couts, provisions, commandes):
     # Initialisation des variables
     nb_fournisseurs = len(matrice_couts)
     nb_clients = len(commandes)
-    transport = np.zeros((nb_fournisseurs, nb_clients))
+    transport = np.zeros((nb_fournisseurs, nb_clients), dtype=int)
     
     # Calcul de la proposition de transport
     for i in range(nb_fournisseurs):
@@ -170,7 +170,7 @@ def proposition_transport_balas_hammer(matrice_couts, provisions, commandes):
 
 def table_couts_potentiels(proposition_transport, matrice_couts):
     nb_fournisseurs, nb_clients = proposition_transport.shape
-    couts_potentiels = np.zeros((nb_fournisseurs, nb_clients))
+    couts_potentiels = np.zeros((nb_fournisseurs, nb_clients), dtype=int)
     dictionnaire_equation = {"L1":0} #Valeur initiale L1 = 0
     #D'abord toutes les valeurs différentes de 0 dans la proposition de transport
     for i in range(0, nb_fournisseurs):
@@ -199,7 +199,7 @@ def table_couts_potentiels(proposition_transport, matrice_couts):
 def calculer_couts_potentiels_graphe(proposition_transport, matrice_couts, graphe):
     
     nb_fournisseurs, nb_clients = proposition_transport.shape
-    couts_potentiels = np.zeros((nb_fournisseurs, nb_clients))
+    couts_potentiels = np.zeros((nb_fournisseurs, nb_clients), dtype=int)
     matrice_couts = np.array(matrice_couts)
 
     
@@ -227,21 +227,21 @@ def calculer_couts_potentiels_graphe(proposition_transport, matrice_couts, graph
                     if neighbor not in dictionnaire_potentiels:
                         dictionnaire_potentiels[neighbor] = dictionnaire_potentiels[current_node] - matrice_couts[source_index, client_index]
                         list_to_visit.append(neighbor)
-
+    
     # Calculer les coûts potentiels pour chaque connexion possible
     for i in range(nb_fournisseurs):
         for j in range(nb_clients):
             si_noeud = f"S{i+1}"
             li_noeud = f"L{j+1}"
-            couts_potentiels[i, j] = abs(dictionnaire_potentiels.get(si_noeud, np.inf) - dictionnaire_potentiels.get(li_noeud, np.inf))
-            # TODO : Valeur fausse à venir si cout potentiel avec valeur négative            
- 
+            couts_potentiels[i, j] = dictionnaire_potentiels.get(si_noeud, np.inf) - dictionnaire_potentiels.get(li_noeud, np.inf)
+            couts_potentiels[i, j] = -couts_potentiels[i, j]
+
     return couts_potentiels
 
 def table_couts_marginaux(matrice_couts, tab_couts_potentiels):
     # Initialisation des variables
     nb_fournisseurs, nb_clients = tab_couts_potentiels.shape
-    couts_marginaux = np.zeros((nb_fournisseurs, nb_clients))
+    couts_marginaux = np.zeros((nb_fournisseurs, nb_clients), dtype=int)
 
     # Calcul des coûts marginaux
     for i in range(nb_fournisseurs):
