@@ -1,6 +1,6 @@
 import numpy as np
 import pprint
-
+from colorama import Fore, Style
 from prettytable import *
 
 import copy
@@ -65,17 +65,26 @@ def afficher_donnees(matrice_des_couts, provisions, commandes):
     tableau.set_style(SINGLE_BORDER)
     print(tableau)
 
-def afficher_proposition_transport_tab_cout(tab_a_afficher, commandes):
+
+def afficher_proposition_transport_tab_cout(proposition_transport, commandes):
     # On crée les entêtes comprenant une colonne pour les fournisseurs, suivies par une colonne pour chaque client
-    entetes_matrice_couts = [''] + [f"L{i+1}" for i in range(len(commandes))]
+    entetes_matrice_couts = [f""] + [f"{Fore.GREEN}L{i+1}{Style.RESET_ALL}" for i in range(len(commandes))]
     tableau = PrettyTable(entetes_matrice_couts)
     
     # Pour chaque ligne dans la matrice des coûts, on ajoute le nom du fournisseur S_n
-    for i, couts in enumerate(tab_a_afficher):
+    for i, couts in enumerate(proposition_transport):
         # Convertir les coûts en chaînes de caractères
         couts_str = [str(c) for c in couts]
         # Ajouter le nom du fournisseur (S1, S2, ...) à la ligne
-        ligne = [f"S{i+1}"] + couts_str
+        ligne = [f"{Fore.GREEN}S{i+1}{Style.RESET_ALL}"] + couts_str
+        
+        # Coloration des cellules en rouge si la valeur est négative
+        for j, cout in enumerate(couts):
+            if cout < 0:
+                ligne[j+1] = f"{Fore.RED}{cout}{Style.RESET_ALL}"
+            else:
+                ligne[j+1] = f"{Fore.BLUE}{cout}{Style.RESET_ALL}"
+        
         tableau.add_row(ligne)
    
     tableau.set_style(SINGLE_BORDER)
