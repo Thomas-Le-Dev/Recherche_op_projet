@@ -96,3 +96,4 @@ while menu != 0:
             
             print('La solution optimale est : ')
             afficher_proposition_transport_tab_cout(proposition_balas_hammer, commandes)
+            print('Le coût total est : ', calculer_cout_total(proposition_balas_hammer, matrice_des_couts))

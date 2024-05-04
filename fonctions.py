@@ -404,3 +404,12 @@ def maximisation(proposition_balas_hammer, graphe, arete, cycle):
 
 
     return proposition_balas_hammer
+
+def calculer_cout_total(proposition_transport, matrice_couts):
+    # Afficher les détails du calcul du coût total
+    # On aurait pu simplement faire np.sum(proposition_transport * matrice_couts)
+    total = 0
+    for i in range(len(proposition_transport)):
+        for j in range(len(proposition_transport[i])):
+            total += proposition_transport[i][j] * matrice_couts[i][j]
+    return total
