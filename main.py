@@ -31,20 +31,21 @@ while menu != 0:
         choix_transport = int(input("Choisissez la : \n1 pour nord-ouest\n2 Pour balas-hammer\n"))
         if choix_transport == 1:
             graphe = construire_graphe_biparti(proposition_nord_ouest)
-            print(graphe)
             if not verifier_graphe_biparti_arete(graphe):
                 print("Le graphe n'est pas connexe")
                 # Ajouter des aretes pour rendre le graphe connexe
                 rajouter_aretes(proposition_nord_ouest, matrice_des_couts, graphe)
             couts_potentiels = table_couts_potentiels(proposition_nord_ouest, matrice_des_couts)
             couts_marginaux = table_couts_marginaux(matrice_des_couts, couts_potentiels)
+            min_tab_marginaux = trouver_valeur_negative(couts_marginaux)
             print("\nTableau des coûts potentiels :\n")
             print(couts_potentiels)
             print("\nTableau des coûts marginaux :\n")
             print(couts_marginaux)
+            print(min_tab_marginaux)
+
         elif choix_transport == 2:
             graphe = construire_graphe_biparti(proposition_balas_hammer)
-            print(graphe)
             if not verifier_graphe_biparti_arete(graphe):
                 print("Le graphe n'est pas connexe")
                 # Ajouter des aretes pour rendre le graphe connexe
@@ -53,7 +54,9 @@ while menu != 0:
             couts_potentiels = calculer_couts_potentiels_graphe(proposition_balas_hammer, matrice_des_couts, graphe)
             #couts_potentiels = table_couts_potentiels(proposition_balas_hammer, matrice_des_couts)
             couts_marginaux = table_couts_marginaux(matrice_des_couts, couts_potentiels)
+            min_tab_marginaux = trouver_valeur_negative(couts_marginaux)
             print("\nTableau des coûts potentiels :\n")
             print(couts_potentiels)
             print("\nTableau des coûts marginaux :\n")
             print(couts_marginaux)
+            print(min_tab_marginaux)
