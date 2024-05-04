@@ -35,14 +35,53 @@ while menu != 0:
                 print("Le graphe n'est pas connexe")
                 # Ajouter des aretes pour rendre le graphe connexe
                 rajouter_aretes(proposition_nord_ouest, matrice_des_couts, graphe)
-            couts_potentiels = table_couts_potentiels(proposition_nord_ouest, matrice_des_couts)
+            else:
+                print("Le graphe est connexe")
+            
+            if not graphe_biparti_contient_cycle(graphe):
+                print("Le graphe est acyclique")
+
+            else:
+                print("Le graphe contient un cycle")
+            
+            couts_potentiels = calculer_couts_potentiels_graphe(proposition_nord_ouest, matrice_des_couts, graphe)
+            #couts_potentiels = table_couts_potentiels(proposition_nord_ouest, matrice_des_couts)
             couts_marginaux = table_couts_marginaux(matrice_des_couts, couts_potentiels)
             min_tab_marginaux = trouver_valeur_negative(couts_marginaux)
+
             print("\nTableau des coûts potentiels :\n")
             afficher_proposition_transport_tab_cout(couts_potentiels, commandes)
             print("\nTableau des coûts marginaux :\n")
             afficher_proposition_transport_tab_cout(couts_marginaux, commandes)
-            print(min_tab_marginaux)
+
+            while min_tab_marginaux[1] < 0:
+                arete = min_tab_marginaux[0]
+                ajouter_arete_specifique(proposition_nord_ouest, graphe, arete)
+                if not graphe_biparti_contient_cycle(graphe):
+                    print("Le graphe est acyclique")
+
+                else:
+                    print("Le graphe contient un cycle")
+                    # def trouver_valeur_maximale(graphe, cycle, proposition_transport, matrice_couts, provisions, commandes):
+                    print(graphe_biparti_contient_cycle(graphe))
+                    proposition_nord_ouest = maximisation(proposition_nord_ouest, graphe, arete, graphe_biparti_contient_cycle(graphe))
+                    print("\nTableau de la proposition transport balas hammer :\n")
+                    afficher_proposition_transport_tab_cout(proposition_nord_ouest, commandes)
+
+                    couts_potentiels = calculer_couts_potentiels_graphe(proposition_nord_ouest, matrice_des_couts, graphe)
+                    couts_marginaux = table_couts_marginaux(matrice_des_couts, couts_potentiels)
+                    min_tab_marginaux = trouver_valeur_negative(couts_marginaux)
+
+                    
+                    print("\nTableau des coûts potentiels :\n")
+                    afficher_proposition_transport_tab_cout(couts_potentiels, commandes)
+                    print("\nTableau des coûts marginaux :\n")
+                    afficher_proposition_transport_tab_cout(couts_marginaux, commandes)
+                    
+            
+            print('La solution optimale est : ')
+            afficher_proposition_transport_tab_cout(proposition_nord_ouest, commandes)
+            print('Le coût total est : ', calculer_cout_total(proposition_nord_ouest, matrice_des_couts))
 
         elif choix_transport == 2:
             graphe = construire_graphe_biparti(proposition_balas_hammer)
