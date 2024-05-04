@@ -58,7 +58,7 @@ while menu != 0:
 
             else:
                 print("Le graphe contient un cycle")
-
+            
             couts_potentiels = calculer_couts_potentiels_graphe(proposition_balas_hammer, matrice_des_couts, graphe)
             #couts_potentiels = table_couts_potentiels(proposition_balas_hammer, matrice_des_couts)
             couts_marginaux = table_couts_marginaux(matrice_des_couts, couts_potentiels)

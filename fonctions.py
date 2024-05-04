@@ -342,12 +342,10 @@ def rajouter_aretes(proposition_transport, matrice_couts, graphe):
     for i, j in zip(sorted_i_indices, sorted_j_indices):
         proposition_transport_temp = proposition_transport.copy()
         graphe_temp = copy.deepcopy(graphe)
-        proposition_transport_temp[i, j] = 1  # Simuler l'ajout du bord
         graphe_temp[f'S{i+1}'].append(f'L{j+1}')
         graphe_temp[f'L{j+1}'].append(f'S{i+1}')
 
         if not graphe_biparti_contient_cycle(graphe_temp):
-            proposition_transport[i, j] = 1  # Ajouter le bord
             graphe[f'S{i+1}'].append(f'L{j+1}')
             graphe[f'L{j+1}'].append(f'S{i+1}')
             print(f'Ajout de l\'arête (S{i+1}, L{j+1})')
@@ -358,7 +356,6 @@ def rajouter_aretes(proposition_transport, matrice_couts, graphe):
 
 def ajouter_arete_specifique(proposition_transport, graphe, arete):
     i, j = arete
-    proposition_transport[i, j] = 1  # Simulate adding the edge
     graphe[f'S{i+1}'].append(f'L{j+1}')
     graphe[f'L{j+1}'].append(f'S{i+1}')
 
