@@ -65,7 +65,7 @@ while menu != 0:
                     # def trouver_valeur_maximale(graphe, cycle, proposition_transport, matrice_couts, provisions, commandes):
                     print(graphe_biparti_contient_cycle(graphe))
                     proposition_nord_ouest = maximisation(proposition_nord_ouest, graphe, arete, graphe_biparti_contient_cycle(graphe))
-                    print("\nTableau de la proposition transport balas hammer :\n")
+                    print("\nTableau de la proposition transport nord ouest :\n")
                     afficher_proposition_transport_tab_cout(proposition_nord_ouest, commandes)
 
                     couts_potentiels = calculer_couts_potentiels_graphe(proposition_nord_ouest, matrice_des_couts, graphe)
