@@ -50,11 +50,31 @@ while menu != 0:
                 print("Le graphe n'est pas connexe")
                 # Ajouter des aretes pour rendre le graphe connexe
                 rajouter_aretes(proposition_balas_hammer, matrice_des_couts, graphe)
+            else:
+                print("Le graphe est connexe")
             
+            if not graphe_biparti_contient_cycle(graphe):
+                print("Le graphe est acyclique")
+
+            else:
+                print("Le graphe contient un cycle")
+
             couts_potentiels = calculer_couts_potentiels_graphe(proposition_balas_hammer, matrice_des_couts, graphe)
             #couts_potentiels = table_couts_potentiels(proposition_balas_hammer, matrice_des_couts)
             couts_marginaux = table_couts_marginaux(matrice_des_couts, couts_potentiels)
             min_tab_marginaux = trouver_valeur_negative(couts_marginaux)
+
+            if min_tab_marginaux[1] >= 0:
+                print("Il n'y a pas de valeur négative dans le tableau des coûts marginaux")
+            else:
+                arete = min_tab_marginaux[0]
+                ajouter_arete_specifique(proposition_balas_hammer, graphe, arete)
+                if not graphe_biparti_contient_cycle(graphe):
+                    print("Le graphe est acyclique")
+
+                else:
+                    print("Le graphe contient un cycle")
+
             print("\nTableau des coûts potentiels :\n")
             print(couts_potentiels)
             print("\nTableau des coûts marginaux :\n")

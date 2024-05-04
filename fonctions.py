@@ -266,23 +266,29 @@ def verifier_graphe_biparti_arete(graphe):
 
 
 def graphe_biparti_contient_cycle(graphe):
+    # Parcours en largeur pour détecter un cycle (demandé dans l'énoncé)
+    # TODO : Afficher le cycle trouvé
     # Detecter un cycle dans un graphe non orienté avec sommets S et L
-    def dfs(sommet, parent, visite):
+    def bfs(sommet, visite):
+        queue = [(sommet, None)]
         visite[sommet] = True
-        for voisin in graphe[sommet]:
-            if not visite[voisin]:
-                if dfs(voisin, sommet, visite):
+        while queue:
+            sommet_courant, parent = queue.pop(0)
+            for voisin in graphe[sommet_courant]:
+                if not visite[voisin]:
+                    visite[voisin] = True
+                    queue.append((voisin, sommet_courant))
+                elif voisin != parent:
                     return True
-            elif voisin != parent:
-                return True
         return False
     
     visite = {sommet: False for sommet in graphe}
     for sommet in visite:
         if not visite[sommet]:
-            if dfs(sommet, None, visite):
+            if bfs(sommet, visite):
                 return True
     return False
+
 
 def graphe_biparti_est_un_arbre(proposition_transport, graphe):
 
@@ -321,13 +327,26 @@ def rajouter_aretes(proposition_transport, matrice_couts, graphe):
 
     return proposition_transport
 
+def ajouter_arete_specifique(proposition_transport, graphe, arete):
+    i, j = arete
+    proposition_transport[i, j] = 1  # Simulate adding the edge
+    graphe[f'S{i+1}'].append(f'L{j+1}')
+    graphe[f'L{j+1}'].append(f'S{i+1}')
+
+    print(f'Ajout de l\'arête (S{i+1}, L{j+1})')
+
+    return proposition_transport
 
 def trouver_valeur_negative(tab_couts_marginaux):
-    #Converti tab en numpy
+    # Converti tab en numpy
     tab_np = np.array(tab_couts_marginaux)
-    #Trouve la valeur la plus négative
+    # Trouve la valeur la plus négative et son index
     valeur_negative = np.min(tab_np)
+    index_valeur_negative = np.where(tab_np == valeur_negative)
+    # Converti l'index en arete du graphe
+    arete = (index_valeur_negative[0][0], index_valeur_negative[1][0])
+    print(f"La valeur la plus négative est {valeur_negative} pour l'arête S{arete[0]+1} - L{arete[1]+1}")
     if valeur_negative >= 0:
         print("\nLa proposition de transport est optimale\n")
 
-    return valeur_negative
+    return (arete, valeur_negative)
