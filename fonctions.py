@@ -164,7 +164,6 @@ def table_couts_potentiels(proposition_transport, matrice_couts):
                     dictionnaire_equation[f"L{i+1}"] = dictionnaire_equation[f"S{j+1}"] - matrice_couts[j][i]
                 else:
                     dictionnaire_equation[f"S{j+1}"] = matrice_couts[j][i] + dictionnaire_equation[f"L{i+1}"]
-    pprint.pprint(dictionnaire_equation)
             
     #Ensuite le reste des cases 
     for j in range(nb_fournisseurs):
@@ -210,12 +209,11 @@ def calculer_couts_potentiels_graphe(proposition_transport, matrice_couts, graph
     # Calculer les coûts potentiels pour chaque connexion possible
     for i in range(nb_fournisseurs):
         for j in range(nb_clients):
-            si_node = f"S{i+1}"
-            li_node = f"L{j+1}"
-            couts_potentiels[i, j] = matrice_couts[i, j] + dictionnaire_potentiels.get(si_node, np.inf) - dictionnaire_potentiels.get(li_node, np.inf)
-            
-
-    pprint.pprint(dictionnaire_potentiels)
+            si_noeud = f"S{i+1}"
+            li_noeud = f"L{j+1}"
+            couts_potentiels[i, j] = abs(dictionnaire_potentiels.get(si_noeud, np.inf) - dictionnaire_potentiels.get(li_noeud, np.inf))
+            # TODO : Valeur fausse à venir si cout potentiel avec valeur négative            
+ 
     return couts_potentiels
 
 def table_couts_marginaux(matrice_couts, tab_couts_potentiels):
@@ -324,3 +322,12 @@ def rajouter_aretes(proposition_transport, matrice_couts, graphe):
     return proposition_transport
 
 
+def trouver_valeur_negative(tab_couts_marginaux):
+    #Converti tab en numpy
+    tab_np = np.array(tab_couts_marginaux)
+    #Trouve la valeur la plus négative
+    valeur_negative = np.min(tab_np)
+    if valeur_negative >= 0:
+        print("\nLa proposition de transport est optimale\n")
+
+    return valeur_negative
