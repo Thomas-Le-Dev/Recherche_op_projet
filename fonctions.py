@@ -279,27 +279,26 @@ def verifier_graphe_biparti_arete(graphe):
 
 
 def graphe_biparti_contient_cycle(graphe):
-    # Parcours en largeur pour détecter un cycle (demandé dans l'énoncé)
-    # TODO : Afficher le cycle trouvé
-    # Detecter un cycle dans un graphe non orienté avec sommets S et L
-    def bfs(sommet, visite):
-        queue = [(sommet, None)]
+    def bfs(sommet, visite, parent, chemin):
         visite[sommet] = True
-        while queue:
-            sommet_courant, parent = queue.pop(0)
-            for voisin in graphe[sommet_courant]:
-                if not visite[voisin]:
-                    visite[voisin] = True
-                    queue.append((voisin, sommet_courant))
-                elif voisin != parent:
+        chemin.append(sommet)
+        for voisin in graphe[sommet]:
+            if not visite[voisin]:
+                if bfs(voisin, visite, sommet, chemin):
                     return True
+            elif voisin != parent:
+                chemin.append(voisin)
+                return True
+        chemin.pop()
         return False
-    
+
     visite = {sommet: False for sommet in graphe}
     for sommet in visite:
         if not visite[sommet]:
-            if bfs(sommet, visite):
-                return True
+            chemin = []
+            if bfs(sommet, visite, None, chemin):
+                print("Cycle détecté :", chemin)
+                return chemin
     return False
 def graphe_biparti_est_un_arbre(proposition_transport, graphe):
 
