@@ -64,9 +64,12 @@ while menu != 0:
             couts_marginaux = table_couts_marginaux(matrice_des_couts, couts_potentiels)
             min_tab_marginaux = trouver_valeur_negative(couts_marginaux)
 
-            if min_tab_marginaux[1] >= 0:
-                print("Il n'y a pas de valeur négative dans le tableau des coûts marginaux")
-            else:
+            print("\nTableau des coûts potentiels :\n")
+            afficher_proposition_transport_tab_cout(couts_potentiels, commandes)
+            print("\nTableau des coûts marginaux :\n")
+            afficher_proposition_transport_tab_cout(couts_marginaux, commandes)
+
+            while min_tab_marginaux[1] < 0:
                 arete = min_tab_marginaux[0]
                 ajouter_arete_specifique(proposition_balas_hammer, graphe, arete)
                 if not graphe_biparti_contient_cycle(graphe):
@@ -74,9 +77,22 @@ while menu != 0:
 
                 else:
                     print("Le graphe contient un cycle")
+                    # def trouver_valeur_maximale(graphe, cycle, proposition_transport, matrice_couts, provisions, commandes):
+                    print(graphe_biparti_contient_cycle(graphe))
+                    proposition_balas_hammer = maximisation(proposition_balas_hammer, graphe, arete, graphe_biparti_contient_cycle(graphe))
+                    print("\nTableau de la proposition transport balas hammer :\n")
+                    afficher_proposition_transport_tab_cout(proposition_balas_hammer, commandes)
 
-            print("\nTableau des coûts potentiels :\n")
-            afficher_proposition_transport_tab_cout(couts_potentiels, commandes)
-            print("\nTableau des coûts marginaux :\n")
-            afficher_proposition_transport_tab_cout(couts_marginaux, commandes)
-            print(min_tab_marginaux)
+                    couts_potentiels = calculer_couts_potentiels_graphe(proposition_balas_hammer, matrice_des_couts, graphe)
+                    couts_marginaux = table_couts_marginaux(matrice_des_couts, couts_potentiels)
+                    min_tab_marginaux = trouver_valeur_negative(couts_marginaux)
+
+                    
+                    print("\nTableau des coûts potentiels :\n")
+                    afficher_proposition_transport_tab_cout(couts_potentiels, commandes)
+                    print("\nTableau des coûts marginaux :\n")
+                    afficher_proposition_transport_tab_cout(couts_marginaux, commandes)
+                    
+            
+            print('La solution optimale est : ')
+            afficher_proposition_transport_tab_cout(proposition_balas_hammer, commandes)

@@ -279,27 +279,37 @@ def verifier_graphe_biparti_arete(graphe):
 
 
 def graphe_biparti_contient_cycle(graphe):
+    # Parcourir le graphe en utilisant la recherche en largeur pour détecter les cycles
     def bfs(sommet, visite, parent, chemin):
         visite[sommet] = True
         chemin.append(sommet)
         for voisin in graphe[sommet]:
             if not visite[voisin]:
-                if bfs(voisin, visite, sommet, chemin):
-                    return True
+                cycle = bfs(voisin, visite, sommet, chemin)
+                if cycle:
+                    return cycle
             elif voisin != parent:
                 chemin.append(voisin)
-                return True
+                # Trouver l'index du sommet où le cycle commence
+                cycle_debut_index = chemin.index(voisin)
+                # Extraire le cycle à partir de cet index
+                cycle = chemin[cycle_debut_index:]
+                print("Cycle détecté :", cycle)
+                return cycle
         chemin.pop()
-        return False
+        return None
 
     visite = {sommet: False for sommet in graphe}
     for sommet in visite:
         if not visite[sommet]:
             chemin = []
-            if bfs(sommet, visite, None, chemin):
-                print("Cycle détecté :", chemin)
-                return chemin
-    return False
+            cycle = bfs(sommet, visite, None, chemin)
+            if cycle:
+                return cycle
+    return None
+
+
+
 def graphe_biparti_est_un_arbre(proposition_transport, graphe):
 
     return verifier_graphe_biparti_arete(graphe) and not graphe_biparti_contient_cycle(graphe)
@@ -360,3 +370,28 @@ def trouver_valeur_negative(tab_couts_marginaux):
         print("\nLa proposition de transport est optimale\n")
 
     return (arete, valeur_negative)
+
+def maximisation(proposition_balas_hammer, graphe, arete, cycle):
+    # Prendre le maximum des lignes et colonnes de la case de l'arête
+    i, j = arete
+    max_ligne = np.max(proposition_balas_hammer[i])
+    max_colonne = np.max(proposition_balas_hammer[:, j])
+    quantite = min(max_ligne, max_colonne)
+    print(f"Quantité maximale à déplacer : {quantite}")
+
+    # Mettre à jour la proposition de transport (+ ou - sur le cycle)
+    # Le cycle recu est ['S1', 'L1', 'S3', 'L3', 'S1'] il faut extraire les indices
+    if cycle:
+        cycle_indices = [int(s[1:]) - 1 for s in cycle]
+        for k in range(len(cycle_indices) - 1):
+            source, client = cycle_indices[k + 1], cycle_indices[k]
+            print(f'Sommet en cours : S{source+1} - L{client+1}')
+            if k % 2 == 0:
+                proposition_balas_hammer[client, source] -= quantite
+                print(f"Quantité ajoutée : {quantite}")
+            else:
+                proposition_balas_hammer[client, source] += quantite
+                print(f"Quantité retirée : {quantite}")
+
+
+    return proposition_balas_hammer
