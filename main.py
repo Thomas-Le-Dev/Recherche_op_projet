@@ -16,17 +16,17 @@ while menu != 0:
         # Sélection et affichage d'un tableau de contraintes
         numero_probleme = selectionner_probleme()
         tabs = range(1, 12)
-        print(f'Il y a {len(tabs)+1} tableaux de contraintes disponibles')
+        print(f'Il y a {len(tabs)+1} tableaux de contraintes disponibles\n')
         matrice_des_couts, provisions, commandes = lire_donnees(f"problemes/probleme{numero_probleme}.txt")
-        print(f"Problème {numero_probleme} sélectionné.")
+        print(f"Problème {numero_probleme} sélectionné.\n")
         afficher_donnees(matrice_des_couts, provisions, commandes)
 
         proposition_nord_ouest = proposition_transport_nord_ouest(matrice_des_couts, provisions.copy(), commandes.copy())
         proposition_balas_hammer = proposition_transport_balas_hammer(matrice_des_couts, provisions.copy(), commandes.copy())
         print("\nTableau de la proposition transport nord ouest :\n")
-        print(proposition_nord_ouest)
+        afficher_proposition_transport_tab_cout(proposition_nord_ouest, commandes)
         print("\nTableau de la proposition transport balas hammer :\n")
-        print(proposition_balas_hammer)
+        afficher_proposition_transport_tab_cout(proposition_balas_hammer, commandes)
 
         choix_transport = int(input("Choisissez la : \n1 pour nord-ouest\n2 Pour balas-hammer\n"))
         if choix_transport == 1:
@@ -39,9 +39,9 @@ while menu != 0:
             couts_marginaux = table_couts_marginaux(matrice_des_couts, couts_potentiels)
             min_tab_marginaux = trouver_valeur_negative(couts_marginaux)
             print("\nTableau des coûts potentiels :\n")
-            print(couts_potentiels)
+            afficher_proposition_transport_tab_cout(couts_potentiels, commandes)
             print("\nTableau des coûts marginaux :\n")
-            print(couts_marginaux)
+            afficher_proposition_transport_tab_cout(couts_marginaux, commandes)
             print(min_tab_marginaux)
 
         elif choix_transport == 2:
@@ -76,7 +76,7 @@ while menu != 0:
                     print("Le graphe contient un cycle")
 
             print("\nTableau des coûts potentiels :\n")
-            print(couts_potentiels)
+            afficher_proposition_transport_tab_cout(couts_potentiels, commandes)
             print("\nTableau des coûts marginaux :\n")
-            print(couts_marginaux)
+            afficher_proposition_transport_tab_cout(couts_marginaux, commandes)
             print(min_tab_marginaux)

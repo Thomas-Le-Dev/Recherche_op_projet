@@ -35,9 +35,7 @@ def lire_donnees(chemin_fichier):
         else:
             # La dernière ligne traite les commandes des clients
             commandes = valeurs
-    print(f"Matrice des coûts : {matrice_des_couts}")
-    print(f"Provisions : {provisions}")
-    print(f"Commandes : {commandes}")
+
     return matrice_des_couts, provisions, commandes
 
 
@@ -53,17 +51,33 @@ def selectionner_probleme():
 
 def afficher_donnees(matrice_des_couts, provisions, commandes):
     # On crée les entêtes comprenant une colonne pour les fournisseurs, suivies par une colonne pour chaque client, et une pour les provisions
-    entetes_matrice_couts = ['Fournisseurs'] + [f"C{i+1}" for i in range(len(commandes))] + ['Provisions']
+    entetes_matrice_couts = ['Fournisseurs'] + [f"L{i+1}" for i in range(len(commandes))] + ['Provisions']
     tableau = PrettyTable(entetes_matrice_couts)
     
     # Pour chaque ligne dans la matrice des coûts, on ajoute le nom du fournisseur P_n, les coûts et la provision
     for i, couts in enumerate(matrice_des_couts):
         # Ajouter le nom du fournisseur (P1, P2, ...) à la ligne
-        ligne = [f"P{i+1}"] + couts + [provisions[i]]
+        ligne = [f"S{i+1}"] + couts + [provisions[i]]
         tableau.add_row(ligne)
     
     # On ajoute la dernière ligne pour les commandes
     tableau.add_row(["Commandes"] + commandes + [""])
+    tableau.set_style(SINGLE_BORDER)
+    print(tableau)
+
+def afficher_proposition_transport_tab_cout(tab_a_afficher, commandes):
+    # On crée les entêtes comprenant une colonne pour les fournisseurs, suivies par une colonne pour chaque client
+    entetes_matrice_couts = [''] + [f"L{i+1}" for i in range(len(commandes))]
+    tableau = PrettyTable(entetes_matrice_couts)
+    
+    # Pour chaque ligne dans la matrice des coûts, on ajoute le nom du fournisseur S_n
+    for i, couts in enumerate(tab_a_afficher):
+        # Convertir les coûts en chaînes de caractères
+        couts_str = [str(c) for c in couts]
+        # Ajouter le nom du fournisseur (S1, S2, ...) à la ligne
+        ligne = [f"S{i+1}"] + couts_str
+        tableau.add_row(ligne)
+   
     tableau.set_style(SINGLE_BORDER)
     print(tableau)
 
@@ -99,24 +113,23 @@ def proposition_transport_balas_hammer(matrice_couts, provisions, commandes):
         for i in range(nb_lignes):
             if lignes_actives[i]:
                 couts = matrice_couts_np[i, colonnes_actives]
-                couts_valides = couts[couts > 0]  # ignore zero as it indicates inactive column
+                couts_valides = couts[couts > 0]  # ne pas tenir compte du zéro qui indique une colonne inactive
                 if len(couts_valides) > 1:
                     couts_valides_tries = np.sort(couts_valides)
                     penalites[i] = couts_valides_tries[1] - couts_valides_tries[0]
                 elif len(couts_valides) == 1:
-                    penalites[i] = couts_valides[0]  # if only one cost exists, penalize by that cost itself
+                    penalites[i] = couts_valides[0]  # s'il n'existe qu'un seul coût, pénaliser par ce coût lui-même
 
         # Calcul des pénalités pour chaque colonne active
         for j in range(nb_colonnes):
             if colonnes_actives[j]:
                 couts = matrice_couts_np[lignes_actives, j]
-                couts_valides = couts[couts > 0]  # ignore zero as it indicates inactive row
+                couts_valides = couts[couts > 0]  # ne pas tenir compte du zéro qui indique une ligne inactive
                 if len(couts_valides) > 1:
                     couts_valides_tries = np.sort(couts_valides)
                     penalites[nb_lignes + j] = couts_valides_tries[1] - couts_valides_tries[0]
                 elif len(couts_valides) == 1:
-                    penalites[nb_lignes + j] = couts_valides[0]  # if only one cost exists, penalize by that cost itself
-
+                    penalites[nb_lignes + j] = couts_valides[0]  # s'il n'existe qu'un seul coût, pénaliser par ce coût lui-même
         # Trouver l'index avec la pénalité la plus élevée
         max_index = np.argmax(penalites)
         if penalites[max_index] == 0:
@@ -288,8 +301,6 @@ def graphe_biparti_contient_cycle(graphe):
             if bfs(sommet, visite):
                 return True
     return False
-
-
 def graphe_biparti_est_un_arbre(proposition_transport, graphe):
 
     return verifier_graphe_biparti_arete(graphe) and not graphe_biparti_contient_cycle(graphe)
@@ -299,7 +310,7 @@ def graphe_biparti_est_un_arbre(proposition_transport, graphe):
 # maximalement acyclique.
 def rajouter_aretes(proposition_transport, matrice_couts, graphe):
     if not isinstance(matrice_couts, np.ndarray):
-        matrice_couts = np.array(matrice_couts)  # Convert to numpy array if it's not
+        matrice_couts = np.array(matrice_couts)  # Convertir en tableau numpy si ce n'est pas le cas
 
     indices_non_relie = np.nonzero(proposition_transport == 0)
     i_indices, j_indices = indices_non_relie
@@ -313,12 +324,12 @@ def rajouter_aretes(proposition_transport, matrice_couts, graphe):
     for i, j in zip(sorted_i_indices, sorted_j_indices):
         proposition_transport_temp = proposition_transport.copy()
         graphe_temp = copy.deepcopy(graphe)
-        proposition_transport_temp[i, j] = 1  # Simulate adding the edge
+        proposition_transport_temp[i, j] = 1  # Simuler l'ajout du bord
         graphe_temp[f'S{i+1}'].append(f'L{j+1}')
         graphe_temp[f'L{j+1}'].append(f'S{i+1}')
 
         if not graphe_biparti_contient_cycle(graphe_temp):
-            proposition_transport[i, j] = 1  # Actually add the edge
+            proposition_transport[i, j] = 1  # Ajouter le bord
             graphe[f'S{i+1}'].append(f'L{j+1}')
             graphe[f'L{j+1}'].append(f'S{i+1}')
             print(f'Ajout de l\'arête (S{i+1}, L{j+1})')
