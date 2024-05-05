@@ -385,6 +385,10 @@ def maximisation(proposition_balas_hammer, graphe, arete, cycle):
     quantite = min(max_ligne, max_colonne)
     print(f"Quantité maximale à déplacer : {quantite}")
 
+    if quantite == 0:
+        print("Quantité maximale nulle, impossible de déplacer la quantité")
+        return proposition_balas_hammer, 0
+
     # Mettre à jour la proposition de transport (+ ou - sur le cycle)
     # Le cycle recu est ['S1', 'L1', 'S3', 'L3', 'S1'] il faut extraire les indices
     if cycle:
@@ -409,7 +413,7 @@ def maximisation(proposition_balas_hammer, graphe, arete, cycle):
                     proposition_balas_hammer[source][client] += quantite
 
 
-    return proposition_balas_hammer
+    return proposition_balas_hammer, quantite
 
 def calculer_cout_total(proposition_transport, matrice_couts):
     # Afficher les détails du calcul du coût total
