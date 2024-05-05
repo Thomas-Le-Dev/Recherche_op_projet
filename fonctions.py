@@ -389,13 +389,17 @@ def maximisation(proposition_balas_hammer, graphe, arete, cycle):
     # Le cycle recu est ['S1', 'L1', 'S3', 'L3', 'S1'] il faut extraire les indices
     if cycle:
         cycle_indices = [int(s[1:]) - 1 for s in cycle]
+        print(cycle_indices)
         for k in range(len(cycle_indices) - 1):
-            source, client = cycle_indices[k + 1], cycle_indices[k]
-            print(f'Sommet en cours : S{source+1} - L{client+1}')
+            #source, client = cycle_indices[k + 1], cycle_indices[k]
             if k % 2 == 0:
+                source, client = cycle_indices[k + 1], cycle_indices[k]
+                print(f'Arete en cours : S{source+1} - L{client+1}')
                 proposition_balas_hammer[client, source] -= quantite
                 print(f"Quantité ajoutée : {quantite}")
             else:
+                client, source = cycle_indices[k + 1], cycle_indices[k]
+                print(f'Arete en cours : L{client+1} - S{source+1}')
                 proposition_balas_hammer[client, source] += quantite
                 print(f"Quantité retirée : {quantite}")
 

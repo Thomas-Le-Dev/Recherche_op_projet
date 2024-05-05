@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 
 # LA FONCTION TIME.CLOCK() EST DEPRECIEE, UTILISER TIME.PERF_COUNTER() A LA PLACE
 
-valeurs_n_test = [10, 40, 10**2] #4*10**2] #, 10**3, 4*10**3, 10**4]
+valeurs_n_test = [10, 40, 10**2, 4*10**2, 10**3, 4*10**3 ] #, 10**4]
 
 def generer_matrice_couts(n):
     # Génère une matrice de coûts de taille n x n
