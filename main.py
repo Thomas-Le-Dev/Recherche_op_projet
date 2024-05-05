@@ -63,7 +63,7 @@ while menu != 0:
                 else:
                     print("Le graphe contient un cycle")
                     # def trouver_valeur_maximale(graphe, cycle, proposition_transport, matrice_couts, provisions, commandes):
-                    print(graphe_biparti_contient_cycle(graphe))
+                    #print(graphe_biparti_contient_cycle(graphe))
                     proposition_nord_ouest, quantite = maximisation(proposition_nord_ouest, graphe, arete, graphe_biparti_contient_cycle(graphe))
                     print("\nTableau de la proposition transport nord ouest :\n")
                     afficher_proposition_transport_tab_cout(proposition_nord_ouest, commandes)
@@ -120,7 +120,7 @@ while menu != 0:
                 else:
                     print("Le graphe contient un cycle")
                     # def trouver_valeur_maximale(graphe, cycle, proposition_transport, matrice_couts, provisions, commandes):
-                    print(graphe_biparti_contient_cycle(graphe))
+                    #print(graphe_biparti_contient_cycle(graphe))
                     proposition_balas_hammer, quantite = maximisation(proposition_balas_hammer, graphe, arete, graphe_biparti_contient_cycle(graphe))
                     print("\nTableau de la proposition transport balas hammer :\n")
                     afficher_proposition_transport_tab_cout(proposition_balas_hammer, commandes)

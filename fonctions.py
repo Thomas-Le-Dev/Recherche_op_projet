@@ -386,31 +386,31 @@ def maximisation(proposition_balas_hammer, graphe, arete, cycle):
     print(f"Quantité maximale à déplacer : {quantite}")
 
     if quantite == 0:
-        print("Quantité maximale nulle, impossible de déplacer la quantité")
-        return proposition_balas_hammer, 0
+        print("La quantité maximale est nulle, fin de l'algorithme")
+        return proposition_balas_hammer, quantite
 
     # Mettre à jour la proposition de transport (+ ou - sur le cycle)
     # Le cycle recu est ['S1', 'L1', 'S3', 'L3', 'S1'] il faut extraire les indices
     if cycle:
         cycle_indices = [int(s[1:]) - 1 for s in cycle]
-        print(cycle_indices)
         for k in range(len(cycle_indices) - 1):
             #source, client = cycle_indices[k + 1], cycle_indices[k]
-            print(cycle[k])
+
             if cycle[k].startswith('S'):
-                source, client = int(cycle[k][1:]) - 1, int(cycle[k + 1][1:]) - 1
+                source, client = int(cycle[k][1:]) - 1, int(cycle[k+1][1:]) - 1
                 print(f'Arete en cours : S{source+1} - L{client+1}')
-                if k % 2 == 0:
-                    proposition_balas_hammer[source][client] += quantite
-                else:
-                    proposition_balas_hammer[source][client] -= quantite
             elif cycle[k].startswith('L'):
-                client, source = int(cycle[k][1:]) - 1, int(cycle[k + 1][1:]) - 1
-                print(f'Arete en cours : S{source+1} - L{client+1}')
-                if k % 2 == 0:
-                    proposition_balas_hammer[source][client] -= quantite
-                else:
-                    proposition_balas_hammer[source][client] += quantite
+                client, source = int(cycle[k][1:]) - 1, int(cycle[k+1][1:]) - 1
+                print(f'Arete en cours : L{client+1} - S{source+1}')
+            
+            if k % 2 == 0:
+                #source, client = cycle_indices[k + 1], cycle_indices[k]
+                proposition_balas_hammer[source, client] -= quantite
+                print(f"Quantité retirée : {quantite}")
+            else:
+                #client, source = cycle_indices[k + 1], cycle_indices[k]
+                proposition_balas_hammer[source, client] += quantite
+                print(f"Quantité ajoutée : {quantite}")
 
 
     return proposition_balas_hammer, quantite
