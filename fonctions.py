@@ -392,16 +392,21 @@ def maximisation(proposition_balas_hammer, graphe, arete, cycle):
         print(cycle_indices)
         for k in range(len(cycle_indices) - 1):
             #source, client = cycle_indices[k + 1], cycle_indices[k]
-            if k % 2 == 0:
-                source, client = cycle_indices[k + 1], cycle_indices[k]
+            print(cycle[k])
+            if cycle[k].startswith('S'):
+                source, client = int(cycle[k][1:]) - 1, int(cycle[k + 1][1:]) - 1
                 print(f'Arete en cours : S{source+1} - L{client+1}')
-                proposition_balas_hammer[client, source] -= quantite
-                print(f"Quantité ajoutée : {quantite}")
-            else:
-                client, source = cycle_indices[k + 1], cycle_indices[k]
-                print(f'Arete en cours : L{client+1} - S{source+1}')
-                proposition_balas_hammer[client, source] += quantite
-                print(f"Quantité retirée : {quantite}")
+                if k % 2 == 0:
+                    proposition_balas_hammer[source][client] += quantite
+                else:
+                    proposition_balas_hammer[source][client] -= quantite
+            elif cycle[k].startswith('L'):
+                client, source = int(cycle[k][1:]) - 1, int(cycle[k + 1][1:]) - 1
+                print(f'Arete en cours : S{source+1} - L{client+1}')
+                if k % 2 == 0:
+                    proposition_balas_hammer[source][client] -= quantite
+                else:
+                    proposition_balas_hammer[source][client] += quantite
 
 
     return proposition_balas_hammer
